@@ -39,11 +39,11 @@ class snmp (
   $bool_disable = any2bool($disable)
   $bool_disableboot = any2bool($disableboot)
 
-  $manage_service_enable = $smtp::bool_disableboot ? {
+  $manage_service_enable = $snmp::bool_disableboot ? {
     true    => false,
-    default => $ntp::bool_disable ? {
+    default => $snmp::bool_disable ? {
       true    => false,
-      default => $ntp::bool_absent ? {
+      default => $snmp::bool_absent ? {
         true    => false,
         default => true,
       },
@@ -117,7 +117,7 @@ class snmp (
   file { 'snmpd.conf':
     ensure  => $snmp::manage_file,
     path    => "$config_directory/snmpd.conf",
-    mode    => '0755',
+    mode    => '0644',
     owner   => $snmp::config_file_owner,
     group   => $snmp::config_file_group,
     notify  => Service['snmpd'],
@@ -135,24 +135,26 @@ class snmp (
       provider => 'sun',
       ensure   => $manage_package,
       before   => [
-        File['/etc/init.d/masfd'],
-        File['/etc/opt/SUNWmasf/conf/snmpd.conf'],
+        File['masf init.d'],
+        File['masf snmpd.conf'],
         ],
     }
 
-    file { '/etc/init.d/masfd':
+    file { 'masf init.d':
       ensure  => $manage_file,
-      mode    => '0744',
+      path    => '/etc/init.d/masfd',
+      mode    => '0744', # as installed by sun, makes little sense
       owner   => $snmp::config_file_owner,
       group   => $snmp::config_file_group,
       notify  => Service['masfd'],
-      source  => 'puppet:///modules/snmp/masfd'
+      source  => 'puppet:///modules/snmp/masfd',
       replace => $snmp::manage_file_replace,
       audit   => $snmp::manage_file_audit,
     }
 
-    file { '/etc/opt/SUNWmasf/conf/snmpd.conf' :
+    file { 'masf snmpd.conf' :
       ensure  => $manage_file,
+      path    => '/etc/opt/SUNWmasf/conf/snmpd.conf',
       mode    => '0644',
       owner   => $snmp::config_file_owner,
       group   => $snmp::config_file_group,

@@ -1,12 +1,14 @@
 class snmp::data {
   require 'stdlib'
 
+  $template = 'snmp/snmpd.conf.erb'
+
   $package_names = $::operatingsystem ? {
     'Solaris' => $::operatingsystemrelease ? {
       '5.10'  => ['SUNWsmagt', 'SUNWsmcmd', 'SUNWsmmgr' ],
       default => undef,
     },
-    '(RedHat|CentOS)' => 'net-snmp',
+    /(RedHat|CentOS)/ => 'net-snmp',
     default           => undef,
   }
 
@@ -24,12 +26,12 @@ class snmp::data {
       default => 'sma',
     },
     'Darwin'          => 'org.net-snmp.snmpd',
-    '(RedHat|CentOS)' => 'snmpd',
+    /(RedHat|CentOS)/ => 'snmpd',
   }
 
   $config_directory = $::operatingsystem ? {
     'Solaris'         => '/etc/sma/snmp',
-    '(RedHat|CentOS)' => '/etc/snmp',
+    /(RedHat|CentOS)/ => '/etc/snmp',
     default           => '/etc/snmp',
   }
 
@@ -81,12 +83,12 @@ class snmp::data {
 
   # Source: http://docs.oracle.com/cd/E19467-01/821-0654-10/chapter1.html
   $masf_platform_packages = $::productname ? {
-    '/Sun Fire V(125|210|215|240|245)/'      => 'SUNWescpl',
-    '/Netra (210|240)/'                      => 'SUNWescpl',
-    '/Sun Fire V(440|445)/'                  => 'SUNWeschl',
+    /Sun Fire V(125|210|215|240|245)/      => 'SUNWescpl',
+    /Netra (210|240)/                      => 'SUNWescpl',
+    /Sun Fire V(440|445)/                  => 'SUNWeschl',
     'Sun Fire T100'                          => [ 'SUNWeserl', 'SUNWespdl', ],
-    '/(Sun Fire|Netra) T200/'                => [ 'SUNWesonl', 'SUNWespdl', ],
-    '/SPARC Enterprise T5(12|22|14|24|44)0/' => [ 'SUNWesonl', 'SUNWespdl', ],
+    /(Sun Fire|Netra) T200/                => [ 'SUNWesonl', 'SUNWespdl', ],
+    /SPARC Enterprise T5(12|22|14|24|44)0/ => [ 'SUNWesonl', 'SUNWespdl', ],
     default                                  => undef,
   }
 

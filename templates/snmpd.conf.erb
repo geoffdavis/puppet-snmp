@@ -13,10 +13,10 @@ syslocation <%= syslocation %>
 <% elsif read_restrict != '' -%>
   <%= "rocommunity #{read_community} #{read_restrict}" -%>
 <% else -%>
-  <%= "rocommunity #{read_community} %>
+  <%= "rocommunity #{read_community}" %>
 <% end -%>
 
-<% if scope.lookup('::operatingsystem') == 'Solaris' -%>
+<% if scope.lookupvar('::operatingsystem') == 'Solaris' -%>
 # Enable Solaris-specific options
 sysservices 72
 dlmod seaProxy /usr/sfw/lib/sparcv9/libseaProxy.so
