@@ -16,8 +16,8 @@ syslocation <%= syslocation %>
   <%= "rocommunity #{read_community} %>
 <% end -%>
 
-<% if sun_masf_enabled -%>
-# Enable proxy to Sun MASF agent
+<% if scope.lookup('::operatingsystem') == 'Solaris' -%>
+# Enable Solaris-specific options
 sysservices 72
 dlmod seaProxy /usr/sfw/lib/sparcv9/libseaProxy.so
 dlmod seaExtensions /usr/sfw/lib/sparcv9/libseaExtensions.so

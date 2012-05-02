@@ -15,6 +15,10 @@
 #   ip/netmask combo. If set, a line will be inserted allowing read-
 #   only access by the ip address using the community specified in
 #   read_community
+#
+# *[masf_proxy]*
+#   Only has an effect on Solaris. Sets up the old MASF hardware daemon
+#   on SPARC platforms to work as an agentx subagent to snmpd
 class snmp (
   $audit_only  = $snmp::data::audit_only,
   $absent      = $snmp::data::absent,
@@ -26,7 +30,8 @@ class snmp (
   $sysdescr    = $snmp::data::sysdescr,
   $syslocation = $snmp::data::syslocation,
   $read_community = $snmp::data::read_community,
-  $read_restrict = ''
+  $read_restrict = '',
+  $masf_proxy = true
 ) inherits snmp::data {
 
   $bool_audit_only = any2bool($audit_only)
@@ -111,5 +116,39 @@ class snmp (
     replace => $snmp::manage_file_replace,
     audit   => $snmp::manage_file_audit,
   }
+
+  ### manage MASF resources on Solaris only
+
+  if $snmp::masf_packages {
+    file { '/etc/init.d/masfd':
+      ensure  => present,
+      mode    => '0744',
+      owner   => $snmp::config_file_owner,
+      group   => $snmp::config_file_group,
+      notify  => Service['masfd'],
+      source  => 'puppet:///modules/snmp/masfd'
+      replace => $snmp::manage_file_replace,
+      audit   => $snmp::manage_file_audit,
+    }
+
+    file { '/etc/opt/SUNWmasf/conf/snmpd.conf' :
+      ensure  => present,
+      mode    => '0644',
+      owner   => $snmp::config_file_owner,
+      group   => $snmp::config_file_group,
+      notify  => Service['masfd'],
+      content => template('snmp/masf.snmpd.conf.erb'),
+      replace => $snmp::manage_file_replace,
+      audit   => $snmp::manage_file_audit,
+    }
+
+    service { 'masfd':
+      ensure    => $snmp::manage_masf_service_ensure,
+      provider  => 'init',
+      enable    => $snmp::manage_masf_service_enable,
+      hasstatus => false,
+    }
+
+  } # end MASF block
 
 }

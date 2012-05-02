@@ -1,4 +1,6 @@
 class snmp::data {
+  require 'stdlib'
+
   $package_names = $::operatingsystem ? {
     'Solaris' => $::operatingsystemrelease ? {
       '5.10'  => ['SUNWsmagt', 'SUNWsmcmd', 'SUNWsmmgr' ],
@@ -31,6 +33,15 @@ class snmp::data {
     default           => '/etc/snmp',
   }
 
+  $config_file_owner = $::operatingsystem ? {
+    default   => 'root',
+  }
+
+  $config_file_group = $::operatingsystem ? {
+    'Solaris' => 'sys',
+    default   => 'root',
+  }
+
   $sysdescr = $::snmp_sysdescr? {
     default => $::snmp_sysdescr,
     ''      => "$::operatingsystem $::operatingsystemrelease $::hostname $::productname",
@@ -57,6 +68,31 @@ class snmp::data {
       default => $::audit_only,
     },
     default => $::snmp_audit_only,
+  }
+
+  $masf_base_packages = [
+    'SUNWmasf',
+    'SUNWmasfr',
+    'SUNWpiclh',
+    'SUNWpiclr',
+    'SUNWpiclu',
+    'SUNWescdl',
+  ]
+
+  # Source: http://docs.oracle.com/cd/E19467-01/821-0654-10/chapter1.html
+  $masf_platform_packages = $::productname ? {
+    '/Sun Fire V(125|210|215|240|245)/'      => 'SUNWescpl',
+    '/Netra (210|240)/'                      => 'SUNWescpl',
+    '/Sun Fire V(440|445)/'                  => 'SUNWeschl',
+    'Sun Fire T100'                          => [ 'SUNWeserl', 'SUNWespdl', ],
+    '/(Sun Fire|Netra) T200/'                => [ 'SUNWesonl', 'SUNWespdl', ],
+    '/SPARC Enterprise T5(12|22|14|24|44)0/' => [ 'SUNWesonl', 'SUNWespdl', ],
+    default                                  => undef,
+  }
+
+  $masf_packages = $masf_platform_packages ? {
+    ''      => undef,
+    default => flatten( [ $masf_base_packages, $masf_platform_packages ] ),
   }
 
 }
