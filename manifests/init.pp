@@ -50,12 +50,22 @@ class snmp (
     },
   }
 
+  $manage_masf_service_enable = $snmp::masf_proxy ? {
+    true  => $snmp::manage_service_enable,
+    false => false,
+  }
+
   $manage_service_ensure = $snmp::bool_disable ? {
     true    => 'stopped',
     default => $snmp::bool_absent ? {
       true    => 'stopped',
       default => 'running',
     },
+  }
+
+  $manage_masf_service_ensure = $snmp::masf_proxy ? {
+    true  => $snmp::manage_service_ensure,
+    false => 'stopped',
   }
 
   $manage_file = $snmp::bool_absent ? {
@@ -105,7 +115,7 @@ class snmp (
   }
 
   file { 'snmpd.conf':
-    ensure  => $snmp::file_ensure,
+    ensure  => $snmp::manage_file,
     path    => "$config_directory/snmpd.conf",
     mode    => '0755',
     owner   => $snmp::config_file_owner,
@@ -117,11 +127,21 @@ class snmp (
     audit   => $snmp::manage_file_audit,
   }
 
-  ### manage MASF resources on Solaris only
+  ### manage MASF resources on Select Sun platforms only
 
   if $snmp::masf_packages {
+
+    package { $masf_packages :
+      provider => 'sun',
+      ensure   => $manage_package,
+      before   => [
+        File['/etc/init.d/masfd'],
+        File['/etc/opt/SUNWmasf/conf/snmpd.conf'],
+        ],
+    }
+
     file { '/etc/init.d/masfd':
-      ensure  => present,
+      ensure  => $manage_file,
       mode    => '0744',
       owner   => $snmp::config_file_owner,
       group   => $snmp::config_file_group,
@@ -132,7 +152,7 @@ class snmp (
     }
 
     file { '/etc/opt/SUNWmasf/conf/snmpd.conf' :
-      ensure  => present,
+      ensure  => $manage_file,
       mode    => '0644',
       owner   => $snmp::config_file_owner,
       group   => $snmp::config_file_group,
