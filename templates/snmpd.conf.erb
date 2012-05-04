@@ -7,16 +7,16 @@ syscontact  <%= syscontact %>
 syslocation <%= syslocation %>
 
 <% if read_restrict.is_a? Array -%>
-  <% read_restrict.each do |addrblock| -%>
-    <%= "rocommunity #{read_community} #{addrblock}" -%>
-  <% end -%>
-<% elsif read_restrict != '' -%>
-  <%= "rocommunity #{read_community} #{read_restrict}" -%>
-<% else -%>
-  <%= "rocommunity #{read_community}" %>
+<% read_restrict.each do |addrblock| -%>
+<%= "rocommunity #{read_community} #{addrblock}" %>
 <% end -%>
-
+<% elsif read_restrict != '' -%>
+<%= "rocommunity #{read_community} #{read_restrict}" %>
+<% else -%>
+<%= "rocommunity #{read_community}" %>
+<% end -%>
 <% if scope.lookupvar('::operatingsystem') == 'Solaris' -%>
+
 # Enable Solaris-specific options
 sysservices 72
 dlmod seaProxy /usr/sfw/lib/sparcv9/libseaProxy.so

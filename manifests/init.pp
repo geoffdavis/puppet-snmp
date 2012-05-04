@@ -167,6 +167,7 @@ class snmp (
     service { 'masfd':
       ensure    => $snmp::manage_masf_service_ensure,
       provider  => 'init',
+      pattern  => '/opt/SUNWmasf/sbin/snmpd',
       enable    => $snmp::manage_masf_service_enable,
       hasstatus => false,
     }

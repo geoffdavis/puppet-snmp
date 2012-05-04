@@ -20,26 +20,6 @@ access masf0Group0 "" v2c noauth exact masf0View0 none none
 view masf0View0 included .1.3.6.1.2.1.47
 view masf0View0 included .1.3.6.1.4.1.42.2.70.101
 
-# ### CHANGED BY ./masfcnv ###
-# # rocommunity public 132.239.4.0/24
-# com2sec masfUser00 132.239.4.0/24 public
-# group masf0Group0 v1 masfUser00
-# group masf0Group0 v2c masfUser00
-# access masf0Group0 "" v1 noauth exact masf0View0 none none
-# access masf0Group0 "" v2c noauth exact masf0View0 none none
-# view masf0View0 included .1.3.6.1.2.1.47
-# view masf0View0 included .1.3.6.1.4.1.42.2.70.101
-# # ### CHANGED BY ./masfcnv ###
-# # rocommunity public 169.228.44.0/25
-# com2sec masfUser10 169.228.44.0/25 public
-# group masf0Group1 v1 masfUser10
-# group masf0Group1 v2c masfUser10
-# access masf0Group1 "" v1 noauth exact masf0View1 none none
-# access masf0Group1 "" v2c noauth exact masf0View1 none none
-# view masf0View1 included .1.3.6.1.2.1.47
-# view masf0View1 included .1.3.6.1.4.1.42.2.70.101
-#
-
 master agentx
 agentxTimeout 2
 agentxRetries 4
