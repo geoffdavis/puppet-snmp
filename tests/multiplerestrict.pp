@@ -1,8 +1,8 @@
 include 'stdlib'
 
 class { 'snmp' :
-  syscontact     => 'ANF Sysadmins <anf-sysadmins@anfmon.ucsd.edu>',
-  syslocation    => 'SDSC Datacenter',
+  syscontact     => 'Site Administrators <foo@bar.com> x12345',
+  syslocation    => 'HappyFunCoLo Inc',
   read_community => 'public',
-  read_restrict  => ['169.228.44.0/25', '132.239.4.0/24' ],
+  read_restrict  => ['192.168.1.0/24', '10.0.0.5' ],
 }
