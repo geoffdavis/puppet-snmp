@@ -64,6 +64,11 @@ class snmp::data {
     ''      => 'public',
   }
 
+  $read_restrict = $::snmp_read_restrict ? {
+    default => $::snmp_read_commnunity,
+    ''      => '',
+  }
+
   $audit_only = $::snmp_audit_only ? {
     '' => $::audit_only ? {
       ''      => false,
