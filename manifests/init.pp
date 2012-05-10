@@ -20,17 +20,17 @@
 #   Only has an effect on Solaris. Sets up the old MASF hardware daemon
 #   on SPARC platforms to work as an agentx subagent to snmpd
 class snmp (
-  $audit_only  = $snmp::data::audit_only,
-  $absent      = $snmp::data::absent,
-  $disable     = $snmp::data::disable,
-  $disableboot = $snmp::data::disableboot,
-  $source      = $snmp::data::source,
-  $template    = $snmp::data::template,
-  $syscontact  = $snmp::data::syscontact,
-  $sysdescr    = $snmp::data::sysdescr,
-  $syslocation = $snmp::data::syslocation,
+  $audit_only     = $snmp::data::audit_only,
+  $absent         = $snmp::data::absent,
+  $disable        = $snmp::data::disable,
+  $disableboot    = $snmp::data::disableboot,
+  $source         = $snmp::data::source,
+  $template       = $snmp::data::template,
+  $syscontact     = $snmp::data::syscontact,
+  $sysdescr       = $snmp::data::sysdescr,
+  $syslocation    = $snmp::data::syslocation,
   $read_community = $snmp::data::read_community,
-  $read_restrict = '',
+  $read_restrict  = $snmp::data::read_restrict,
   $masf_proxy = true
 ) inherits snmp::data {
 
