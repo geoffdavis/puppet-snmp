@@ -55,6 +55,14 @@ class snmp (
     false => false,
   }
 
+  # Force sun provider for SNMP packages for the time being
+  # pkgutil provider needs special configuration to handle SUNW
+  # packages
+  $manage_package_provider = $::operatingsystem ? {
+    solaris => 'sun',
+    default => undef,
+  }
+
   $manage_service_ensure = $snmp::bool_disable ? {
     true    => 'stopped',
     default => $snmp::bool_absent ? {
@@ -103,8 +111,9 @@ class snmp (
   ### Manage resources
 
   package { $snmp::package_names :
-    ensure => $snmp::manage_package,
-    before => $package_before,
+    provider => $snmp::manage_package_provider,
+    ensure   => $snmp::manage_package,
+    before   => $package_before,
   }
 
   service { 'snmpd':
@@ -132,8 +141,8 @@ class snmp (
   if $snmp::masf_packages {
 
     package { $masf_packages :
-      provider => 'sun',
-      ensure   => $manage_package,
+      provider => $snmp::manage_package_provider,
+      ensure   => $snmp::manage_package,
       before   => [
         File['masf init.d'],
         File['masf snmpd.conf'],
