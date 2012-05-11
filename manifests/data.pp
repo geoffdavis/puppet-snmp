@@ -65,7 +65,7 @@ class snmp::data {
   }
 
   $read_restrict = $::snmp_read_restrict ? {
-    default => $::snmp_read_commnunity,
+    default => $::snmp_read_restrict,
     ''      => '',
   }
 
