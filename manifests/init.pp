@@ -20,10 +20,10 @@
 #   Only has an effect on Solaris. Sets up the old MASF hardware daemon
 #   on SPARC platforms to work as an agentx subagent to snmpd
 class snmp (
-  $audit_only     = $snmp::data::audit_only,
-  $absent         = $snmp::data::absent,
-  $disable        = $snmp::data::disable,
-  $disableboot    = $snmp::data::disableboot,
+  $audit_only     = false,
+  $absent         = false,
+  $disable        = false,
+  $disableboot    = false,
   $source         = $snmp::data::source,
   $template       = $snmp::data::template,
   $syscontact     = $snmp::data::syscontact,
@@ -34,18 +34,18 @@ class snmp (
   $masf_proxy = true
 ) inherits snmp::data {
 
-  $bool_audit_only = any2bool($audit_only)
-  $bool_absent = any2bool($absent)
-  $bool_disable = any2bool($disable)
-  $bool_disableboot = any2bool($disableboot)
+  validate_bool($audit_only)
+  validate_bool($absent)
+  validate_bool($disable)
+  validate_bool($disableboot)
 
-  $manage_service_enable = $snmp::bool_disableboot ? {
+  $manage_service_enable = $disableboot ? {
     true    => false,
-    default => $snmp::bool_disable ? {
+    false => $disable ? {
       true    => false,
-      default => $snmp::bool_absent ? {
+      false => $absent ? {
         true    => false,
-        default => true,
+        false => true,
       },
     },
   }
@@ -63,7 +63,7 @@ class snmp (
     default => undef,
   }
 
-  $manage_service_ensure = $snmp::bool_disable ? {
+  $manage_service_ensure = $disable ? {
     true    => 'stopped',
     default => $snmp::bool_absent ? {
       true    => 'stopped',
@@ -76,7 +76,7 @@ class snmp (
     false => 'stopped',
   }
 
-  $manage_file = $snmp::bool_absent ? {
+  $manage_file = $snmp::absent ? {
     true    => 'absent',
     default => 'present',
   }
@@ -91,12 +91,12 @@ class snmp (
     default => template($snmp::template),
   }
 
-  $manage_audit = $snmp::bool_audit_only ? {
+  $manage_audit = $audit_only ? {
     true  => 'all',
     false => undef,
   }
 
-  $manage_file_replace = $snmp::bool_audit_only ? {
+  $manage_file_replace = $audit_only ? {
     true  => false,
     false => true,
   }
