@@ -65,7 +65,7 @@ class snmp (
 
   $manage_service_ensure = $disable ? {
     true    => 'stopped',
-    default => $snmp::bool_absent ? {
+    default => $absent ? {
       true    => 'stopped',
       default => 'running',
     },
@@ -102,7 +102,7 @@ class snmp (
   }
 
   ### Set dependency order
-  if $bool_absent {
+  if $absent {
     $package_before = undef
   } else {
     $package_before = [ Service['snmpd'], File['snmpd.conf'] ]
@@ -111,8 +111,8 @@ class snmp (
   ### Manage resources
 
   package { $snmp::package_names :
-    provider => $snmp::manage_package_provider,
     ensure   => $snmp::manage_package,
+    provider => $snmp::manage_package_provider,
     before   => $package_before,
   }
 
@@ -125,7 +125,7 @@ class snmp (
 
   file { 'snmpd.conf':
     ensure  => $snmp::manage_file,
-    path    => "$config_directory/snmpd.conf",
+    path    => "${snmp::data::config_directory}/snmpd.conf",
     mode    => '0644',
     owner   => $snmp::config_file_owner,
     group   => $snmp::config_file_group,
@@ -138,11 +138,11 @@ class snmp (
 
   ### manage MASF resources on Select Sun platforms only
 
-  if $snmp::masf_packages {
+  if $snmp::data::masf_packages {
 
-    package { $masf_packages :
-      provider => $snmp::manage_package_provider,
+    package { $snmp::data::masf_packages :
       ensure   => $snmp::manage_package,
+      provider => $snmp::manage_package_provider,
       before   => [
         File['masf init.d'],
         File['masf snmpd.conf'],
@@ -176,7 +176,7 @@ class snmp (
     service { 'masfd':
       ensure    => $snmp::manage_masf_service_ensure,
       provider  => 'init',
-      pattern  => '/opt/SUNWmasf/sbin/snmpd',
+      pattern   => '/opt/SUNWmasf/sbin/snmpd',
       enable    => $snmp::manage_masf_service_enable,
       hasstatus => false,
     }
