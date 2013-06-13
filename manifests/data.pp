@@ -1,3 +1,4 @@
+# shared data for the snmp module
 class snmp::data {
   require 'stdlib'
 
@@ -46,12 +47,12 @@ class snmp::data {
 
   $sysdescr = $::snmp_sysdescr? {
     default => $::snmp_sysdescr,
-    ''      => "$::operatingsystem $::operatingsystemrelease $::hostname $::productname",
+    ''      => "${::operatingsystem} ${::operatingsystemrelease} ${::hostname} ${::productname}",
   }
 
   $syscontact = $::snmp_syscontact ? {
     default => $::snmp_syscontact,
-    ''      => "Root <root@$::fqdn>",
+    ''      => "Root <root@${::fqdn}>",
   }
 
   $syslocation = $::snmp_syslocation ? {
