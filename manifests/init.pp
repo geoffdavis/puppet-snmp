@@ -140,37 +140,40 @@ class snmp (
 
   if $snmp::data::masf_packages {
 
-    package { $snmp::data::masf_packages :
-      ensure   => $snmp::manage_package,
-      provider => $snmp::manage_package_provider,
-      before   => [
-        File['masf init.d'],
-        File['masf snmpd.conf'],
+    if $snmp::masf_proxy {
+      package { $snmp::data::masf_packages :
+        ensure   => $snmp::manage_package,
+        provider => $snmp::manage_package_provider,
+        before   => [
+          File['masf init.d'],
+          File['masf snmpd.conf'],
         ],
-    }
+      }
 
-    file { 'masf init.d':
-      ensure  => $manage_file,
-      path    => '/etc/init.d/masfd',
-      mode    => '0744', # as installed by sun, makes little sense
-      owner   => $snmp::config_file_owner,
-      group   => $snmp::config_file_group,
-      notify  => Service['masfd'],
-      source  => 'puppet:///modules/snmp/masfd',
-      replace => $snmp::manage_file_replace,
-      audit   => $snmp::manage_file_audit,
-    }
+      file { 'masf init.d':
+        ensure  => $manage_file,
+        path    => '/etc/init.d/masfd',
+        mode    => '0744', # as installed by sun, makes little sense
+        owner   => $snmp::config_file_owner,
+        group   => $snmp::config_file_group,
+        notify  => Service['masfd'],
+        source  => 'puppet:///modules/snmp/masfd',
+        replace => $snmp::manage_file_replace,
+        audit   => $snmp::manage_file_audit,
+      }
 
-    file { 'masf snmpd.conf' :
-      ensure  => $manage_file,
-      path    => '/etc/opt/SUNWmasf/conf/snmpd.conf',
-      mode    => '0644',
-      owner   => $snmp::config_file_owner,
-      group   => $snmp::config_file_group,
-      notify  => Service['masfd'],
-      content => template('snmp/masf.snmpd.conf.erb'),
-      replace => $snmp::manage_file_replace,
-      audit   => $snmp::manage_file_audit,
+      file { 'masf snmpd.conf' :
+        ensure  => $manage_file,
+        path    => '/etc/opt/SUNWmasf/conf/snmpd.conf',
+        mode    => '0644',
+        owner   => $snmp::config_file_owner,
+        group   => $snmp::config_file_group,
+        notify  => Service['masfd'],
+        content => template('snmp/masf.snmpd.conf.erb'),
+        replace => $snmp::manage_file_replace,
+        audit   => $snmp::manage_file_audit,
+      }
+
     }
 
     service { 'masfd':

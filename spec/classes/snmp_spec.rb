@@ -11,6 +11,35 @@ describe 'snmp', :type=>'class' do
     it { should contain_package('SUNWsmagt') }
     it { should contain_package('SUNWsmcmd') }
     it { should contain_package('SUNWsmmgr') }
+
+    context 'with masf_proxy = false' do
+      let(:params) {{
+        :masf_proxy => false,
+      }}
+
+      it { should_not contain_package('SUNWescpl') }
+      it { should_not contain_package('SUNWeschl') }
+      it { should_not contain_package('SUNWeserl') }
+      it { should_not contain_package('SUNWespdl') }
+      it { should_not contain_package('SUNWesonl') }
+    end
+
+    context 'with masf_proxy = true' do
+      let(:params) {{
+        :masf_proxy => true,
+      }}
+
+      context 'on a T2000' do
+        let(:facts) {{
+          :osfamily => 'solaris',
+          :operatingsystem => 'solaris',
+          :productname => 'Sun Fire T200',
+        }}
+        it { should contain_package('SUNWesonl') }
+        it { should contain_package('SUNWespdl') }
+      end
+
+    end
   end
 
   context 'On a RedHat OS' do
