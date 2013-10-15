@@ -31,8 +31,10 @@ class snmp (
   $syslocation    = $snmp::data::syslocation,
   $read_community = $snmp::data::read_community,
   $read_restrict  = $snmp::data::read_restrict,
-  $masf_proxy = true
+  $masf_proxy     = true,
 ) inherits snmp::data {
+
+  include stdlib
 
   validate_bool($audit_only)
   validate_bool($absent)
@@ -186,4 +188,20 @@ class snmp (
 
   } # end MASF block
 
+  case $::osfamily {
+    'RedHat': {
+      file { '/etc/sysconfig/snmpd':
+        ensure  => $snmp::manage_file,
+        mode    => '0644',
+        owner   => $snmp::config_file_owner,
+        group   => $snmp::config_file_group,
+        notify  => Service['snmpd'],
+        content => 'OPTIONS="-LS0-4d -Lf /dev/null -p /var/run/snmpd.pid"',
+        replace => $snmp::manage_file_replace,
+        audit   => $snmp::manage_file_audit,
+      }
+    } default: {
+      # NOOP
+    }
+  }
 }

@@ -1,6 +1,6 @@
 # shared data for the snmp module
 class snmp::data {
-  require 'stdlib'
+  require stdlib
 
   $template = 'snmp/snmpd.conf.erb'
 
@@ -47,7 +47,8 @@ class snmp::data {
 
   $sysdescr = $::snmp_sysdescr? {
     default => $::snmp_sysdescr,
-    ''      => "${::operatingsystem} ${::operatingsystemrelease} ${::hostname} ${::productname}",
+    ''      =>
+    "${::operatingsystem} ${::operatingsystemrelease} ${::hostname} ${::productname}",
   }
 
   $syscontact = $::snmp_syscontact ? {
@@ -102,5 +103,4 @@ class snmp::data {
     ''      => undef,
     default => flatten( [ $masf_base_packages, $masf_platform_packages ] ),
   }
-
 }
