@@ -196,7 +196,7 @@ class snmp (
         owner   => $snmp::config_file_owner,
         group   => $snmp::config_file_group,
         notify  => Service['snmpd'],
-        content => 'OPTIONS="-LS0-4d -Lf /dev/null -p /var/run/snmpd.pid"',
+        content => "OPTIONS='-LS0-4d -Lf /dev/null -p /var/run/snmpd.pid'\n",
         replace => $snmp::manage_file_replace,
         audit   => $snmp::manage_file_audit,
       }
