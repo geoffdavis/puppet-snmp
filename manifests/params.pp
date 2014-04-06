@@ -1,6 +1,6 @@
 # shared data for the snmp module
-class snmp::data {
-  require stdlib
+class snmp::params {
+  include stdlib
 
   $template = 'snmp/snmpd.conf.erb'
 
@@ -45,10 +45,16 @@ class snmp::data {
     default   => 'root',
   }
 
+  $default_sysdescr = join([
+    $::operatingsystem,
+    $::operatingsystemrelease,
+    $::hostname,
+    $::productname,
+  ], ' ')
+
   $sysdescr = $::snmp_sysdescr? {
     default => $::snmp_sysdescr,
-    ''      =>
-    "${::operatingsystem} ${::operatingsystemrelease} ${::hostname} ${::productname}",
+    ''      => $default_sysdescr,
   }
 
   $syscontact = $::snmp_syscontact ? {
@@ -93,10 +99,10 @@ class snmp::data {
     /Sun Fire V(125|210|215|240|245)/      => 'SUNWescpl',
     /Netra (210|240)/                      => 'SUNWescpl',
     /Sun Fire V(440|445)/                  => 'SUNWeschl',
-    'Sun Fire T100'                          => [ 'SUNWeserl', 'SUNWespdl', ],
-    /(Sun Fire|Netra) T200/                => [ 'SUNWesonl', 'SUNWespdl', ],
-    /SPARC Enterprise T5(12|22|14|24|44)0/ => [ 'SUNWesonl', 'SUNWespdl', ],
-    default                                  => undef,
+    'Sun Fire T100'                        => ['SUNWeserl','SUNWespdl'],
+    /(Sun Fire|Netra) T200/                => ['SUNWesonl','SUNWespdl'],
+    /SPARC Enterprise T5(12|22|14|24|44)0/ => ['SUNWesonl','SUNWespdl'],
+    default                                => undef,
   }
 
   $masf_packages = $masf_platform_packages ? {

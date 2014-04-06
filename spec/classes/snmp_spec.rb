@@ -31,8 +31,8 @@ describe 'snmp', :type=>'class' do
 
       context 'on a T2000' do
         let(:facts) {{
-          :osfamily => 'solaris',
-          :operatingsystem => 'solaris',
+          :osfamily => 'Solaris',
+          :operatingsystem => 'Solaris',
           :productname => 'Sun Fire T200',
         }}
         it { should contain_package('SUNWesonl') }
