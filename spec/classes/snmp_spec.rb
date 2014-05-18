@@ -42,6 +42,19 @@ describe 'snmp', :type=>'class' do
     end
   end
 
+  context 'On a FreeBSD OS' do
+    let(:facts) {{
+      :operatingsystem=>'FreeBSD',
+      :osfamily=>'FreeBSD',
+    }}
+
+    it { should contain_package('net-snmp') }
+    it { should contain_service('snmpd') }
+    it { should contain_freebsd__rc_conf('snmpd_conffile') }
+    it { should contain_freebsd__rc_conf('snmpd_enable') }
+    it { should contain_freebsd__rc_conf('snmpd_flags') }
+  end
+
   context 'On a RedHat OS' do
     let(:facts) {{
       :operatingsystem=>'CentOS',
@@ -49,6 +62,7 @@ describe 'snmp', :type=>'class' do
     }}
 
     it { should contain_package('net-snmp') }
+    it { should contain_service('snmpd') }
   end
 
   context 'On a valid OS' do

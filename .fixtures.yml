@@ -2,3 +2,4 @@ fixtures:
   symlinks:
     snmp:   "#{source_dir}"
     stdlib: "#{source_dir}/../stdlib"
+    freebsd: "#{source_dir}/../freebsd"

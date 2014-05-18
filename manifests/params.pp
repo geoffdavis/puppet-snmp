@@ -109,4 +109,13 @@ class snmp::params {
     ''      => undef,
     default => flatten( [ $masf_base_packages, $masf_platform_packages ] ),
   }
+  $rc =  {
+    'snmpd_conffile' => { value => "${config_directory}/snmpd.conf" },
+    'snmpd_enable'   => { value => true },
+    'snmpd_flags'    => { value => '-a' },
+  }
+  $rc_conf_tweaks = $::osfamily ? {
+    /i?BSD$/ => $rc,
+    default  => undef,
+  }
 }
