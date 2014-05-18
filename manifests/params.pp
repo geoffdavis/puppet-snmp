@@ -4,13 +4,13 @@ class snmp::params {
 
   $template = 'snmp/snmpd.conf.erb'
 
-  $package_names = $::operatingsystem ? {
+  $package_names = $::osfamily ? {
     'Solaris' => $::operatingsystemrelease ? {
       '5.10'  => ['SUNWsmagt', 'SUNWsmcmd', 'SUNWsmmgr' ],
       default => undef,
     },
-    /(RedHat|CentOS)/ => 'net-snmp',
-    default           => undef,
+    /(RedHat|FreeBSD)/ => 'net-snmp',
+    default            => undef,
   }
 
   $package_provider = $::operatingsystem ? {
@@ -21,28 +21,28 @@ class snmp::params {
     default => undef,
   }
 
-  $service = $::operatingsystem ? {
+  $service = $::osfamily ? {
     'Solaris' => $::operatingsystemrelease ? {
       '5.10'  => 'svc:/application/management/sma:default',
       default => 'sma',
     },
-    'Darwin'          => 'org.net-snmp.snmpd',
-    /(RedHat|CentOS)/ => 'snmpd',
+    'Darwin'           => 'org.net-snmp.snmpd',
+    /(RedHat|FreeBSD)/ => 'snmpd',
   }
 
-  $config_directory = $::operatingsystem ? {
-    'Solaris'         => '/etc/sma/snmp',
-    /(RedHat|CentOS)/ => '/etc/snmp',
-    default           => '/etc/snmp',
+  $config_directory = $::osfamily ? {
+    'Solaris' => '/etc/sma/snmp',
+    'RedHat'  => '/etc/snmp',
+    'FreeBSD' => '/usr/local/etc/snmp',
+    default   => '/etc/snmp',
   }
 
-  $config_file_owner = $::operatingsystem ? {
-    default   => 'root',
-  }
+  $config_file_owner = 'root'
 
-  $config_file_group = $::operatingsystem ? {
-    'Solaris' => 'sys',
-    default   => 'root',
+  $config_file_group = $::osfamily ? {
+    'Solaris'            => 'sys',
+    /^(Darwin|FreeBSD)$/ => 'wheel',
+    default              => 'root',
   }
 
   $default_sysdescr = join([

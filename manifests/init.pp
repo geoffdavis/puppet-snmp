@@ -216,6 +216,13 @@ class snmp (
         replace => $manage_file_replace,
         audit   => $manage_audit,
       }
+    } 'FreeBSD': {
+      $rc = {
+        'snmpd_conffile' => { value => "${config_directory}/snmpd.conf" },
+        'snmpd_enable'   => { value => true },
+        'snmpd_flags'    => { value => '-a' },
+      }
+      create_resources('freebsd::rc_conf',$rc)
     } default: {
       # NOOP
     }
