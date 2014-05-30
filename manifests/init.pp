@@ -120,18 +120,20 @@ class snmp (
   ], "\n")
 
   ### Set dependency order
-  if $absent {
-    $package_before = undef
-  } else {
-    $package_before = [ Service['snmpd'], File['snmpd.conf'] ]
+  $package_before = $absent ? {
+    ''      => [ Service['snmpd'], File['snmpd.conf'] ],
+    default => undef,
   }
 
   ### Manage resources
 
-  package { $package_names :
-    ensure   => $manage_package,
-    provider => $manage_package_provider,
-    before   => $package_before,
+  if $package_names {
+    package { $package_names :
+      ensure   => $manage_package,
+      provider => $manage_package_provider,
+      before   => $package_before,
+    }
+    $service_require = $package_names
   }
 
   service { 'snmpd':
@@ -139,6 +141,7 @@ class snmp (
     name      => $service,
     enable    => $manage_service_enable,
     hasstatus => $service_status,
+    require   => $service_require,
   }
 
   file { 'snmpd.conf':
