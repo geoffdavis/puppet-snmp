@@ -133,7 +133,6 @@ class snmp (
       provider => $manage_package_provider,
       before   => $package_before,
     }
-    $service_require = $package_names
   }
 
   service { 'snmpd':
@@ -141,7 +140,6 @@ class snmp (
     name      => $service,
     enable    => $manage_service_enable,
     hasstatus => $service_status,
-    require   => $service_require,
   }
 
   file { 'snmpd.conf':
