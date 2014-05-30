@@ -13,7 +13,7 @@ class snmp::params {
     default            => undef,
   }
 
-  $package_provider = $::operatingsystem ? {
+  $package_provider = $::osfamily ? {
     'Solaris' => $::operatingsystemrelease ? {
       '5.10'  => 'sun',
       default => undef,
@@ -22,7 +22,7 @@ class snmp::params {
   }
 
   $service = $::osfamily ? {
-    'Solaris' => $::operatingsystemrelease ? {
+    'Solaris'          => $::operatingsystemrelease ? {
       '5.10'  => 'svc:/application/management/sma:default',
       default => 'sma',
     },
