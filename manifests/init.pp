@@ -55,10 +55,9 @@ class snmp (
     'Solaris' => $::hardwareisa ? {
       'i386'  => '/usr/sfw/lib/amd64',
       'sparc' => '/usr/sfw/lib/sparcv9',
-      default => '/usr/sfw/lib/this/is/fucked',
+      default => undef,
     },
-    'RedHat' => undef,
-    default  => '/usr/sfw/lib/Fuckery',
+    default => undef,
   }
 
   $manage_service_enable = $disableboot ? {
