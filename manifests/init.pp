@@ -97,6 +97,8 @@ class snmp (
     false => 'stopped',
   }
 
+  $manage_solaris_netsnmp_ensure = 'stopped'
+
   $manage_file = $absent ? {
     true    => 'absent',
     default => 'present',
@@ -145,6 +147,13 @@ class snmp (
     }
   }
 
+  if $::operatingsystem == 'Solaris' {
+    # kill off the stupid CSW snmp daemons that hijack the ports
+    service { ['netsnmpd','netsnmptrapd'] :
+      ensure => $manage_solaris_netsnmp_ensure,
+      before => Service['snmpd'],
+    }
+  }
   service { 'snmpd':
     ensure    => $manage_service_ensure,
     name      => $service,

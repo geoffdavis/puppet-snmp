@@ -13,6 +13,8 @@ describe 'snmp', :type=>'class' do
     it { should contain_package('SUNWsmagt') }
     it { should contain_package('SUNWsmcmd') }
     it { should contain_package('SUNWsmmgr') }
+    it { should contain_service('netsnmpd').with_ensure('stopped') }
+    it { should contain_service('netsnmptrapd').with_ensure('stopped') }
 
     context 'with masf_proxy = false' do
       let(:params) {{
@@ -45,7 +47,6 @@ describe 'snmp', :type=>'class' do
 
     context 'on a SPARC ISA system' do
       let(:facts) { {
-        :operatingsystem => 'Solaris',
         :hardwareisa     => 'sparc',
       }.merge(basefacts) }
       it { should contain_file('snmpd.conf').with_content(
@@ -79,6 +80,8 @@ describe 'snmp', :type=>'class' do
 #    it { should contain_freebsd__rc_conf('snmpd_flags') }
 #    it { should contain_file('snmpd.conf').with_content(
 #      /(?<!\/usr\/sfw)/ ) }
+#    it { should_not contain_service('netsnmpd').with_ensure('stopped') }
+#    it { should_not contain_service('netsnmptrapd').with_ensure('stopped') }
 #  end
 
   context 'On a RedHat OS' do
@@ -92,6 +95,9 @@ describe 'snmp', :type=>'class' do
     it { should contain_file('snmpd.conf').with_content(
       /(?<!\/usr\/sfw)/
     ) }
+
+    it { should_not contain_service('netsnmpd').with_ensure('stopped') }
+    it { should_not contain_service('netsnmptrapd').with_ensure('stopped') }
   end
 
   context 'On a valid OS' do
