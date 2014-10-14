@@ -4,13 +4,13 @@ source 'https://rubygems.org'
 
 # facter
 facter_version = ENV.key?('FACTER_VERSION') ? "= #{ENV['FACTER_VERSION']}" : \
-  '= 1.6.17' # from puppet enterprise 2.8
+  '= 1.7.5' # from puppet enterprise 2.8
 # puppet
 puppet_version = ENV.key?('PUPPET_VERSION') ? "= #{ENV['PUPPET_VERSION']}" : \
-  '= 2.7.21' # from puppet enterprise 2.8
+  '= 3.4.3' # from puppet enterprise 2.8
 # hiera
 hiera_version = ENV.key?('HIERA_VERSION') ? "= #{ENV['HIERA_VERSION']}" : \
-  '= 1.1.2' # from puppet enterprise 2.8
+  '= 1.3.2' # from puppet enterprise 2.8
 # hiera-puppet
 hiera_puppet_version = ENV.key?('HIERA_PUPPET_VERSION') ? \
   "= #{ENV['HIERA_PUPPET_VERSION']}" : '= 1.0.0' # from puppet enterprise 2.8
@@ -36,7 +36,7 @@ gem 'rspec', rspec_version
 gem 'facter', facter_version
 gem 'puppet', puppet_version
 gem 'rspec-puppet', rspec_puppet_version
-gem 'rcov'
+#gem 'rcov'
 
 ## Puppet 2.x does not include hiera.
 if puppet_version =~ /^([^0-9]+)?([^\.]|)2(\..*?)$/
