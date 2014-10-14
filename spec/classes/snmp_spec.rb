@@ -45,7 +45,6 @@ describe 'snmp', :type=>'class' do
 
     context 'on a SPARC ISA system' do
       let(:facts) { {
-        :operatingsystem => 'Solaris',
         :hardwareisa     => 'sparc',
       }.merge(basefacts) }
       it { should contain_file('snmpd.conf').with_content(
