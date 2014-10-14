@@ -49,7 +49,8 @@ Basic usage:
     include 'snmp'
 
 More advanced:
+
     class { 'snmp' :
-      syscontact  => "System Administrator <root@$::fqdn>",
+      syscontact  => "System Administrator <root@${::fqdn}>",
       syslocation => 'Server room Rack 103a',
     }

@@ -1,5 +1,6 @@
 fixtures:
   repositories:
-    stdlib: https://github.com/puppetlabs/puppetlabs-stdlib.git
+    stdlib: 'https://github.com/puppetlabs/puppetlabs-stdlib.git'
   symlinks:
-    snmp: "#{source_dir}"
+    snmp:    "#{source_dir}"
+    freebsd: "#{source_dir}/../freebsd"

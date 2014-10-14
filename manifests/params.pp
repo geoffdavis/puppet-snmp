@@ -1,19 +1,19 @@
 # shared data for the snmp module
-class snmp::data {
-  require 'stdlib'
+class snmp::params {
+  include stdlib
 
   $template = 'snmp/snmpd.conf.erb'
 
-  $package_names = $::operatingsystem ? {
+  $package_names = $::osfamily ? {
     'Solaris' => $::operatingsystemrelease ? {
       '5.10'  => ['SUNWsmagt', 'SUNWsmcmd', 'SUNWsmmgr' ],
       default => undef,
     },
-    /(RedHat|CentOS)/ => 'net-snmp',
-    default           => undef,
+    /(RedHat|FreeBSD)/ => 'net-snmp',
+    default            => undef,
   }
 
-  $package_provider = $::operatingsystem ? {
+  $package_provider = $::osfamily ? {
     'Solaris' => $::operatingsystemrelease ? {
       '5.10'  => 'sun',
       default => undef,
@@ -21,33 +21,40 @@ class snmp::data {
     default => undef,
   }
 
-  $service = $::operatingsystem ? {
-    'Solaris' => $::operatingsystemrelease ? {
+  $service = $::osfamily ? {
+    'Solaris'          => $::operatingsystemrelease ? {
       '5.10'  => 'svc:/application/management/sma:default',
       default => 'sma',
     },
-    'Darwin'          => 'org.net-snmp.snmpd',
-    /(RedHat|CentOS)/ => 'snmpd',
+    'Darwin'           => 'org.net-snmp.snmpd',
+    /(RedHat|FreeBSD)/ => 'snmpd',
   }
 
-  $config_directory = $::operatingsystem ? {
-    'Solaris'         => '/etc/sma/snmp',
-    /(RedHat|CentOS)/ => '/etc/snmp',
-    default           => '/etc/snmp',
+  $config_directory = $::osfamily ? {
+    'Solaris' => '/etc/sma/snmp',
+    'RedHat'  => '/etc/snmp',
+    'FreeBSD' => '/usr/local/etc/snmp',
+    default   => '/etc/snmp',
   }
 
-  $config_file_owner = $::operatingsystem ? {
-    default   => 'root',
+  $config_file_owner = 'root'
+
+  $config_file_group = $::osfamily ? {
+    'Solaris'            => 'sys',
+    /^(Darwin|FreeBSD)$/ => 'wheel',
+    default              => 'root',
   }
 
-  $config_file_group = $::operatingsystem ? {
-    'Solaris' => 'sys',
-    default   => 'root',
-  }
+  $default_sysdescr = join([
+    $::operatingsystem,
+    $::operatingsystemrelease,
+    $::hostname,
+    $::productname,
+  ], ' ')
 
   $sysdescr = $::snmp_sysdescr? {
     default => $::snmp_sysdescr,
-    ''      => "${::operatingsystem} ${::operatingsystemrelease} ${::hostname} ${::productname}",
+    ''      => $default_sysdescr,
   }
 
   $syscontact = $::snmp_syscontact ? {
@@ -92,15 +99,23 @@ class snmp::data {
     /Sun Fire V(125|210|215|240|245)/      => 'SUNWescpl',
     /Netra (210|240)/                      => 'SUNWescpl',
     /Sun Fire V(440|445)/                  => 'SUNWeschl',
-    'Sun Fire T100'                          => [ 'SUNWeserl', 'SUNWespdl', ],
-    /(Sun Fire|Netra) T200/                => [ 'SUNWesonl', 'SUNWespdl', ],
-    /SPARC Enterprise T5(12|22|14|24|44)0/ => [ 'SUNWesonl', 'SUNWespdl', ],
-    default                                  => undef,
+    'Sun Fire T100'                        => ['SUNWeserl','SUNWespdl'],
+    /(Sun Fire|Netra) T200/                => ['SUNWesonl','SUNWespdl'],
+    /SPARC Enterprise T5(12|22|14|24|44)0/ => ['SUNWesonl','SUNWespdl'],
+    default                                => undef,
   }
 
   $masf_packages = $masf_platform_packages ? {
     ''      => undef,
     default => flatten( [ $masf_base_packages, $masf_platform_packages ] ),
   }
-
+  $rc =  {
+    'snmpd_conffile' => { value => "${config_directory}/snmpd.conf" },
+    'snmpd_enable'   => { value => true },
+    'snmpd_flags'    => { value => '-a' },
+  }
+  $rc_conf_tweaks = $::osfamily ? {
+    /i?BSD$/ => $rc,
+    default  => undef,
+  }
 }

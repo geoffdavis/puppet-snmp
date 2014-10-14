@@ -20,19 +20,31 @@
 #   Only has an effect on Solaris. Sets up the old MASF hardware daemon
 #   on SPARC platforms to work as an agentx subagent to snmpd
 class snmp (
-  $audit_only     = false,
-  $absent         = false,
-  $disable        = false,
-  $disableboot    = false,
-  $source         = $snmp::data::source,
-  $template       = $snmp::data::template,
-  $syscontact     = $snmp::data::syscontact,
-  $sysdescr       = $snmp::data::sysdescr,
-  $syslocation    = $snmp::data::syslocation,
-  $read_community = $snmp::data::read_community,
-  $read_restrict  = $snmp::data::read_restrict,
-  $masf_proxy = true
-) inherits snmp::data {
+  $audit_only        = false,
+  $absent            = false,
+  $disable           = false,
+  $disableboot       = false,
+  $source            = $snmp::params::source,
+  $template          = $snmp::params::template,
+  $syscontact        = $snmp::params::syscontact,
+  $sysdescr          = $snmp::params::sysdescr,
+  $syslocation       = $snmp::params::syslocation,
+  $read_community    = $snmp::params::read_community,
+  $read_restrict     = $snmp::params::read_restrict,
+  $masf_proxy        = true,
+) inherits snmp::params {
+
+  # Normalize some un-tweakable params to this namespace.
+  $config_directory  = $snmp::params::config_directory
+  $config_file_owner = $snmp::params::config_file_owner
+  $config_file_group = $snmp::params::config_file_group
+  $masf_packages     = $snmp::params::masf_packages
+  $manage_package    = $snmp::params::manage_package
+  $package_names     = $snmp::params::package_names
+  $service           = $snmp::params::service
+  $service_status    = $snmp::params::service_status
+
+  include stdlib
 
   validate_bool($audit_only)
   validate_bool($absent)
@@ -50,8 +62,8 @@ class snmp (
     },
   }
 
-  $manage_masf_service_enable = $snmp::masf_proxy ? {
-    true  => $snmp::manage_service_enable,
+  $manage_masf_service_enable = $masf_proxy ? {
+    true  => $manage_service_enable,
     false => false,
   }
 
@@ -59,8 +71,8 @@ class snmp (
   # pkgutil provider needs special configuration to handle SUNW
   # packages
   $manage_package_provider = $::operatingsystem ? {
-    solaris => 'sun',
-    default => undef,
+    'Solaris' => 'sun',
+    default   => undef,
   }
 
   $manage_service_ensure = $disable ? {
@@ -71,24 +83,24 @@ class snmp (
     },
   }
 
-  $manage_masf_service_ensure = $snmp::masf_proxy ? {
-    true  => $snmp::manage_service_ensure,
+  $manage_masf_service_ensure = $masf_proxy ? {
+    true  => $manage_service_ensure,
     false => 'stopped',
   }
 
-  $manage_file = $snmp::absent ? {
+  $manage_file = $absent ? {
     true    => 'absent',
     default => 'present',
   }
 
-  $manage_file_source = $snmp::source ? {
+  $manage_file_source = $source ? {
     ''      => undef,
-    default => $snmp::source,
+    default => $source,
   }
 
-  $manage_file_content = $snmp::template ? {
+  $manage_file_content = $template ? {
     ''      => undef,
-    default => template($snmp::template),
+    default => template($template),
   }
 
   $manage_audit = $audit_only ? {
@@ -101,49 +113,56 @@ class snmp (
     false => true,
   }
 
+  $sysconfig_content = join([
+    "# Managed by Puppet ${module_name}.",
+    'OPTIONS="-LS0-4d -Lf /dev/null -p /var/run/snmpd.pid"',
+    "\n",
+  ], "\n")
+
   ### Set dependency order
-  if $absent {
-    $package_before = undef
-  } else {
-    $package_before = [ Service['snmpd'], File['snmpd.conf'] ]
+  $package_before = $absent ? {
+    ''      => [ Service['snmpd'], File['snmpd.conf'] ],
+    default => undef,
   }
 
   ### Manage resources
 
-  package { $snmp::package_names :
-    ensure   => $snmp::manage_package,
-    provider => $snmp::manage_package_provider,
-    before   => $package_before,
+  if $package_names {
+    package { $package_names :
+      ensure   => $manage_package,
+      provider => $manage_package_provider,
+      before   => $package_before,
+    }
   }
 
   service { 'snmpd':
-    ensure    => $snmp::manage_service_ensure,
-    name      => $snmp::service,
-    enable    => $snmp::manage_service_enable,
-    hasstatus => $snmp::service_status,
+    ensure    => $manage_service_ensure,
+    name      => $service,
+    enable    => $manage_service_enable,
+    hasstatus => $service_status,
   }
 
   file { 'snmpd.conf':
-    ensure  => $snmp::manage_file,
-    path    => "${snmp::data::config_directory}/snmpd.conf",
+    ensure  => $manage_file,
+    path    => "${config_directory}/snmpd.conf",
     mode    => '0644',
-    owner   => $snmp::config_file_owner,
-    group   => $snmp::config_file_group,
+    owner   => $config_file_owner,
+    group   => $config_file_group,
     notify  => Service['snmpd'],
-    source  => $snmp::manage_file_source,
-    content => $snmp::manage_file_content,
-    replace => $snmp::manage_file_replace,
-    audit   => $snmp::manage_file_audit,
+    source  => $manage_file_source,
+    content => $manage_file_content,
+    replace => $manage_file_replace,
+    audit   => $manage_audit,
   }
 
   ### manage MASF resources on Select Sun platforms only
 
-  if $snmp::data::masf_packages {
+  if $masf_packages {
 
-    if $snmp::masf_proxy {
-      package { $snmp::data::masf_packages :
-        ensure   => $snmp::manage_package,
-        provider => $snmp::manage_package_provider,
+    if $masf_proxy {
+      package { $masf_packages :
+        ensure   => $manage_package,
+        provider => $manage_package_provider,
         before   => [
           File['masf init.d'],
           File['masf snmpd.conf'],
@@ -154,36 +173,54 @@ class snmp (
         ensure  => $manage_file,
         path    => '/etc/init.d/masfd',
         mode    => '0744', # as installed by sun, makes little sense
-        owner   => $snmp::config_file_owner,
-        group   => $snmp::config_file_group,
+        owner   => $config_file_owner,
+        group   => $config_file_group,
         notify  => Service['masfd'],
         source  => 'puppet:///modules/snmp/masfd',
-        replace => $snmp::manage_file_replace,
-        audit   => $snmp::manage_file_audit,
+        replace => $manage_file_replace,
+        audit   => $manage_audit,
       }
 
       file { 'masf snmpd.conf' :
         ensure  => $manage_file,
         path    => '/etc/opt/SUNWmasf/conf/snmpd.conf',
         mode    => '0644',
-        owner   => $snmp::config_file_owner,
-        group   => $snmp::config_file_group,
+        owner   => $config_file_owner,
+        group   => $config_file_group,
         notify  => Service['masfd'],
         content => template('snmp/masf.snmpd.conf.erb'),
-        replace => $snmp::manage_file_replace,
-        audit   => $snmp::manage_file_audit,
+        replace => $manage_file_replace,
+        audit   => $manage_audit,
       }
 
     }
 
     service { 'masfd':
-      ensure    => $snmp::manage_masf_service_ensure,
+      ensure    => $manage_masf_service_ensure,
       provider  => 'init',
       pattern   => '/opt/SUNWmasf/sbin/snmpd',
-      enable    => $snmp::manage_masf_service_enable,
+      enable    => $manage_masf_service_enable,
       hasstatus => false,
     }
 
-  } # end MASF block
+  }
 
+  case $::osfamily {
+    'RedHat': {
+      file { '/etc/sysconfig/snmpd':
+        ensure  => $manage_file,
+        mode    => '0644',
+        owner   => $config_file_owner,
+        group   => $config_file_group,
+        notify  => Service['snmpd'],
+        content => $sysconfig_content,
+        replace => $manage_file_replace,
+        audit   => $manage_audit,
+      }
+    } 'FreeBSD': {
+      create_resources('freebsd::rc_conf',$snmp::params::rc_conf_tweaks)
+    } default: {
+      # NOOP
+    }
+  }
 }
