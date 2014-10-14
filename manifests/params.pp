@@ -22,8 +22,9 @@ class snmp::params {
   }
 
   $service = $::osfamily ? {
-    'Solaris'          => $::operatingsystemrelease ? {
+    'Solaris' => $::operatingsystemrelease ? {
       '5.10'  => 'svc:/application/management/sma:default',
+      /^10/   => 'svc:/application/management/sma:default',
       default => 'sma',
     },
     'Darwin'           => 'org.net-snmp.snmpd',

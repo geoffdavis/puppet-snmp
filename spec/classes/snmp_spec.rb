@@ -2,11 +2,13 @@ require 'spec_helper'
 
 describe 'snmp', :type=>'class' do
   context 'On a Solaris OS version 5.10' do
-    let(:facts) {{
-      :operatingsystem=>'Solaris',
-      :osfamily=>'Solaris',
-      :operatingsystemrelease=>'5.10',
-    }}
+    basefacts = {
+      :operatingsystem        => 'Solaris',
+      :osfamily               => 'Solaris',
+      :operatingsystemrelease => '5.10',
+    }
+
+    let(:facts) { basefacts }
 
     it { should contain_package('SUNWsmagt') }
     it { should contain_package('SUNWsmcmd') }
@@ -30,30 +32,54 @@ describe 'snmp', :type=>'class' do
       }}
 
       context 'on a T2000' do
-        let(:facts) {{
-          :osfamily => 'Solaris',
-          :operatingsystem => 'Solaris',
-          :productname => 'Sun Fire T200',
-        }}
+        let(:facts) { {
+          :productname   => 'Sun Fire T200',
+          :hardwareisa   => 'sparc',
+          :hardwaremodel => 'sun4v',
+        }.merge(basefacts) }
         it { should contain_package('SUNWesonl') }
         it { should contain_package('SUNWespdl') }
       end
 
     end
-  end
 
-  context 'On a FreeBSD OS' do
-    let(:facts) {{
-      :operatingsystem=>'FreeBSD',
-      :osfamily=>'FreeBSD',
-    }}
-
-    it { should contain_package('net-snmp') }
-    it { should contain_service('snmpd') }
-    it { should contain_freebsd__rc_conf('snmpd_conffile') }
-    it { should contain_freebsd__rc_conf('snmpd_enable') }
-    it { should contain_freebsd__rc_conf('snmpd_flags') }
+    context 'on a SPARC ISA system' do
+      let(:facts) { {
+        :operatingsystem => 'Solaris',
+        :hardwareisa     => 'sparc',
+      }.merge(basefacts) }
+      it { should contain_file('snmpd.conf').with_content(
+        /\/usr\/sfw\/lib\/sparcv9/) }
+    end
+    context 'on an i386 ISA system' do
+      let(:facts) { {
+        :hardwareisa => 'i386',
+      }.merge(basefacts) }
+      it { should contain_file('snmpd.conf').with_content(
+        /\/usr\/sfw\/lib\/amd64/) }
+    end
+    context 'on an unknown ISA system' do
+      let(:facts) { {
+        :hardwareisa => nil,
+      }.merge(basefacts) }
+      it { should contain_file('snmpd.conf').with_content(
+        /(?<!\/usr\/sfw)/ ) }
+    end
   end
+#  context 'On a FreeBSD OS' do
+#    let(:facts) {{
+#      :operatingsystem=>'FreeBSD',
+#      :osfamily=>'FreeBSD',
+#    }}
+#
+#    it { should contain_package('net-snmp') }
+#    it { should contain_service('snmpd') }
+#    it { should contain_freebsd__rc_conf('snmpd_conffile') }
+#    it { should contain_freebsd__rc_conf('snmpd_enable') }
+#    it { should contain_freebsd__rc_conf('snmpd_flags') }
+#    it { should contain_file('snmpd.conf').with_content(
+#      /(?<!\/usr\/sfw)/ ) }
+#  end
 
   context 'On a RedHat OS' do
     let(:facts) {{
@@ -63,6 +89,9 @@ describe 'snmp', :type=>'class' do
 
     it { should contain_package('net-snmp') }
     it { should contain_service('snmpd') }
+    it { should contain_file('snmpd.conf').with_content(
+      /(?<!\/usr\/sfw)/
+    ) }
   end
 
   context 'On a valid OS' do

@@ -51,6 +51,16 @@ class snmp (
   validate_bool($disable)
   validate_bool($disableboot)
 
+  $sea_proxy_isa_libdir = $::operatingsystem ? {
+    'Solaris' => $::hardwareisa ? {
+      'i386'  => '/usr/sfw/lib/amd64',
+      'sparc' => '/usr/sfw/lib/sparcv9',
+      default => '/usr/sfw/lib/this/is/fucked',
+    },
+    'RedHat' => undef,
+    default  => '/usr/sfw/lib/Fuckery',
+  }
+
   $manage_service_enable = $disableboot ? {
     true    => false,
     false => $disable ? {
@@ -112,6 +122,7 @@ class snmp (
     true  => false,
     false => true,
   }
+
 
   $sysconfig_content = join([
     "# Managed by Puppet ${module_name}.",
@@ -217,8 +228,8 @@ class snmp (
         replace => $manage_file_replace,
         audit   => $manage_audit,
       }
-    } 'FreeBSD': {
-      create_resources('freebsd::rc_conf',$snmp::params::rc_conf_tweaks)
+      #    } 'FreeBSD': {
+      #create_resources('freebsd::rc_conf',$snmp::params::rc_conf_tweaks)
     } default: {
       # NOOP
     }

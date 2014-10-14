@@ -16,9 +16,8 @@ rocommunity <%= @read_community %> <%= @read_restrict %>
 rocommunity <%= @read_community %>
 <%- end -%>
 # Enable any OS-specific options
-<%- case scope.lookupvar('::operatingsystem') -%>
-<%- when 'Solaris' then -%>
+<%- if @sea_proxy_isa_libdir -%>
 sysservices 72
-dlmod seaProxy /usr/sfw/lib/sparcv9/libseaProxy.so
-dlmod seaExtensions /usr/sfw/lib/sparcv9/libseaExtensions.so
+dlmod seaProxy <%= @sea_proxy_isa_libdir %>/libseaProxy.so
+dlmod seaExtensions <%= @sea_proxy_isa_libdir %>/libseaExtensions.so
 <%- end -%>
