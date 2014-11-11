@@ -112,7 +112,8 @@ describe 'snmp', :type=>'class' do
         :read_restrict => '192.168.2.3',
       } }
       it { should contain_file('snmpd.conf')\
-        .with_content(/^rocommunity public 192\.168\.2\.3$/)
+        .with_content(/^rocommunity public 192\.168\.2\.3$/)\
+        .with_content(/skipNFSInHostResources false/)
       }
     end
 
@@ -132,6 +133,15 @@ describe 'snmp', :type=>'class' do
       it { should contain_file('snmpd.conf')\
         .with_content(/^rocommunity public 192\.168\.1\.0\/24$/)\
         .with_content(/^rocommunity public 10\.0\.0\.5$/)
+      }
+    end
+    context 'with skipNFSInHostResources enabled' do
+      let(:params) { {
+        :skip_nfs_in_host_resources => true,
+      } }
+
+      it { should contain_file('snmpd.conf')\
+        .with_content(/skipNFSInHostResources true/)
       }
     end
 
