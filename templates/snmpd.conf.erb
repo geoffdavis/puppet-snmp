@@ -15,6 +15,7 @@ rocommunity <%= @read_community %> <%= @read_restrict %>
 <%- else -%>
 rocommunity <%= @read_community %>
 <%- end -%>
+skipNFSInHostResources <%= @skip_nfs_in_host_resources.to_s %>
 # Enable any OS-specific options
 <%- if @sea_proxy_isa_libdir -%>
 sysservices 72
