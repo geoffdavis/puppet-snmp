@@ -19,19 +19,24 @@
 # *[masf_proxy]*
 #   Only has an effect on Solaris. Sets up the old MASF hardware daemon
 #   on SPARC platforms to work as an agentx subagent to snmpd
+#
+# *[skip_nfs_in_host_resources]*
+#   Enables/disables skipNFSInHostResources.  Must be a bool.
+#   Defaults to false per the snmpd.conf man pages.
 class snmp (
-  $audit_only        = false,
-  $absent            = false,
-  $disable           = false,
-  $disableboot       = false,
-  $source            = $snmp::params::source,
-  $template          = $snmp::params::template,
-  $syscontact        = $snmp::params::syscontact,
-  $sysdescr          = $snmp::params::sysdescr,
-  $syslocation       = $snmp::params::syslocation,
-  $read_community    = $snmp::params::read_community,
-  $read_restrict     = $snmp::params::read_restrict,
-  $masf_proxy        = true,
+  $audit_only                 = false,
+  $absent                     = false,
+  $disable                    = false,
+  $disableboot                = false,
+  $source                     = $snmp::params::source,
+  $template                   = $snmp::params::template,
+  $syscontact                 = $snmp::params::syscontact,
+  $sysdescr                   = $snmp::params::sysdescr,
+  $syslocation                = $snmp::params::syslocation,
+  $read_community             = $snmp::params::read_community,
+  $read_restrict              = $snmp::params::read_restrict,
+  $masf_proxy                 = true,
+  $skip_nfs_in_host_resources = false,
 ) inherits snmp::params {
 
   # Normalize some un-tweakable params to this namespace.
@@ -50,6 +55,7 @@ class snmp (
   validate_bool($absent)
   validate_bool($disable)
   validate_bool($disableboot)
+  validate_bool($skip_nfs_in_host_resources)
 
   $sea_proxy_isa_libdir = $::operatingsystem ? {
     'Solaris' => $::hardwareisa ? {
