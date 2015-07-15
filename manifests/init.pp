@@ -171,7 +171,7 @@ class snmp (
       # Per `man 5 snmp_config`
       ensure_resource('file',$snmp::params::config_directory,{
         ensure => 'directory',
-        before => 'snmpd.conf',
+        before => File['snmpd.conf'],
       })
       create_resources('file_line',{
         'rc.conf snmp_flags' => {
