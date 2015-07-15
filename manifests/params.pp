@@ -34,7 +34,7 @@ class snmp::params {
   $config_directory = $::osfamily ? {
     'Solaris' => '/etc/sma/snmp',
     'RedHat'  => '/etc/snmp',
-    'FreeBSD' => '/usr/local/etc/snmp',
+    'FreeBSD' => '/usr/local/share/snmp',
     default   => '/etc/snmp',
   }
 
