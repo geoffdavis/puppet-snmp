@@ -116,7 +116,7 @@ class snmp (
 
   $sysconfig_content = join([
     "# Managed by Puppet ${module_name}.",
-    "OPTIONS=\"${flags}\" -p ${pidfile}",
+    "OPTIONS=\"${flags} -p ${pidfile}\"",
     "\n",
   ],"\n")
 
