@@ -37,7 +37,8 @@ class snmp (
   $read_restrict              = $snmp::params::read_restrict,
   $masf_proxy                 = true,
   $skip_nfs_in_host_resources = false,
-  $flags                      = '-LS0-4d -Lf /dev/null -p /var/run/snmpd.pid',
+  $flags                      = '-LS0-4d -Lf /dev/null',
+  $pidfile                    = '/var/run/snmpd.pid',
 ) inherits snmp::params {
 
   # Normalize some un-tweakable params to this namespace.
@@ -115,7 +116,7 @@ class snmp (
 
   $sysconfig_content = join([
     "# Managed by Puppet ${module_name}.",
-    "OPTIONS=\"${flags}\"",
+    "OPTIONS=\"${flags}\" -p ${pidfile}",
     "\n",
   ],"\n")
 
@@ -174,11 +175,15 @@ class snmp (
         before => File['snmpd.conf'],
       })
       create_resources('file_line',{
-        'rc.conf snmp_flags' => {
+        'rc.conf snmpd_flags' => {
           line  => "snmpd_flags=\"${flags}\"",
           match => '^snmpd_flags=',
         },
-        'rc.conf snmp_conffile' => {
+        'rc.conf snmpd_pidfile' => {
+          line  => "snmpd_pidfile=\"${pidfile}\"",
+          match => '^snmpd_pidfile=',
+        },
+        'rc.conf snmpd_conffile' => {
           line  => "snmpd_conffile=\"${config_directory}/snmpd.conf\"",
           match => '^snmpd_conffile=',
         },
