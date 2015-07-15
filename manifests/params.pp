@@ -1,6 +1,5 @@
 # shared data for the snmp module
 class snmp::params {
-  include stdlib
 
   $template = 'snmp/snmpd.conf.erb'
 
@@ -28,13 +27,13 @@ class snmp::params {
       default => 'sma',
     },
     'Darwin'           => 'org.net-snmp.snmpd',
-    /(RedHat|FreeBSD)/ => 'snmpd',
+    default            => 'snmpd',
   }
 
   $config_directory = $::osfamily ? {
+    'Darwin'  => '/private/etc/snmp',
+    'FreeBSD' => '/usr/local/etc/snmp',
     'Solaris' => '/etc/sma/snmp',
-    'RedHat'  => '/etc/snmp',
-    'FreeBSD' => '/usr/local/share/snmp',
     default   => '/etc/snmp',
   }
 
@@ -46,44 +45,19 @@ class snmp::params {
     default              => 'root',
   }
 
-  $default_sysdescr = join([
+  $sysdescr = join([
     $::operatingsystem,
     $::operatingsystemrelease,
     $::hostname,
     $::productname,
   ], ' ')
-
-  $sysdescr = $::snmp_sysdescr? {
-    default => $::snmp_sysdescr,
-    ''      => $default_sysdescr,
-  }
-
-  $syscontact = $::snmp_syscontact ? {
-    default => $::snmp_syscontact,
-    ''      => "Root <root@${::fqdn}>",
-  }
-
-  $syslocation = $::snmp_syslocation ? {
-    default => $::snmp_syslocation,
-    ''      => 'Unknown (configure the Puppet SNMP module)',
-  }
-
-  $read_community = $::snmp_read_community ? {
-    default => $::snmp_read_community,
-    ''      => 'public',
-  }
-
-  $read_restrict = $::snmp_read_restrict ? {
-    default => $::snmp_read_restrict,
-    ''      => '',
-  }
-
-  $audit_only = $::snmp_audit_only ? {
-    '' => $::audit_only ? {
-      ''      => false,
-      default => $::audit_only,
-    },
-    default => $::snmp_audit_only,
+  $syscontact     = "Root <root@${::fqdn}>"
+  $syslocation    = 'Unknown (configure the Puppet SNMP module)'
+  $read_community = 'public'
+  $read_restrict  = ''
+  $audit_only     = $::audit_only ? {
+    undef   => false,
+    default => $::audit_only,
   }
 
   $masf_base_packages = [
@@ -107,16 +81,7 @@ class snmp::params {
   }
 
   $masf_packages = $masf_platform_packages ? {
-    ''      => undef,
+    undef   => undef,
     default => flatten( [ $masf_base_packages, $masf_platform_packages ] ),
-  }
-  $rc =  {
-    'snmpd_conffile' => { value => "${config_directory}/snmpd.conf" },
-    'snmpd_enable'   => { value => true },
-    'snmpd_flags'    => { value => '-a' },
-  }
-  $rc_conf_tweaks = $::osfamily ? {
-    /i?BSD$/ => $rc,
-    default  => undef,
   }
 }
