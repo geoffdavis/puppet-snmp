@@ -1,6 +1,20 @@
 # Should be called by init class only
 class snmp::config {
 
+  if $snmp::ensure == 'present' {
+    File[$snmp::config_directory] -> File['snmpd.conf']
+  } else {
+    File['snmpd.conf'] -> File[$snmp::config_directory]
+  }
+
+  file { $snmp::config_directory :
+    ensure  => $snmp::ensure_dir,
+    path    => "${snmp::config_directory}/snmpd.conf",
+    mode    => '0755',
+    owner   => $snmp::config_file_owner,
+    group   => $snmp::config_file_group,
+  }
+
   file { 'snmpd.conf':
     ensure  => $snmp::ensure_file,
     path    => "${snmp::config_directory}/snmpd.conf",
