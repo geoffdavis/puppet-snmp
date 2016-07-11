@@ -9,7 +9,6 @@ class snmp::config {
 
   file { $snmp::config_directory :
     ensure  => $snmp::ensure_dir,
-    path    => "${snmp::config_directory}/snmpd.conf",
     mode    => '0755',
     owner   => $snmp::config_file_owner,
     group   => $snmp::config_file_group,
