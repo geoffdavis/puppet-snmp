@@ -1,44 +1,90 @@
 # shared data for the snmp module
-class snmp::params {
+# Set $darwin_provider to undef to use the (unreliable) OS built-in.
+class snmp::params(
+  $darwin_provider  = 'macports',
+) {
+  validate_re($::osfamily,'^(Darwin|FreeBSD|RedHat|Solaris)$',
+    "${::operatingsystem} unsupported")
+  validate_re($darwin_provider,'^(apple|macports)$',
+    '$darwin_provider must be set to "apple" or "macports"')
 
-  $template = 'snmp/snmpd.conf.erb'
+
+  $flags              = '-LS0-4d -Lf /dev/null'
+  $pidfile            = '/var/run/snmpd.pid'
+  $config_source      = undef
+  $config_template    = 'snmp/snmpd.conf.erb'
+  $sysconfig_template = $::osfamily ? {
+    default  => undef,
+    'RedHat' => 'snmp/redhat.sysconfig.erb',
+  }
+  $skip_nfs_in_host_resources = false
 
   $package_names = $::osfamily ? {
-    'Solaris' => $::operatingsystemrelease ? {
+    default            => undef,
+    /(RedHat|FreeBSD)/ => 'net-snmp',
+    'Darwin'           => $darwin_provider ? {
+      'macports' => 'net-snmp',
+      default    => undef,
+    },
+    'Solaris' => $::kernelrelease ? {
       '5.10'  => ['SUNWsmagt', 'SUNWsmcmd', 'SUNWsmmgr' ],
       default => undef,
     },
-    /(RedHat|FreeBSD)/ => 'net-snmp',
-    default            => undef,
   }
 
   $package_provider = $::osfamily ? {
-    'Solaris' => $::operatingsystemrelease ? {
+    default   => undef,
+    'Solaris' => $::kernelrelease ? {
       '5.10'  => 'sun',
       default => undef,
     },
-    default => undef,
+    'Darwin'  => $darwin_provider ? {
+      'macports' => 'macports',
+      default    => undef,
+    },
   }
 
   $service = $::osfamily ? {
-    'Solaris' => $::operatingsystemrelease ? {
+    default   => 'snmpd',
+    'Solaris' => $::kernelrelease ? {
       '5.10'  => 'svc:/application/management/sma:default',
-      /^10/   => 'svc:/application/management/sma:default',
       default => 'sma',
     },
-    'Darwin'           => 'org.net-snmp.snmpd',
-    default            => 'snmpd',
+    'Darwin'  => $darwin_provider ? {
+      'macports' => 'org.macports.net-snmp',
+      default    => 'org.net-snmp.snmpd',
+    },
+  }
+
+  # kill off any competing snmp daemons that hijack the ports
+  $service_disabled = $::osfamily ? {
+    default   => undef,
+    'Solaris' => ['netsnmpd','netsnmptrapd'],
+    'Darwin'  => $darwin_provider ? {
+      'macports' => 'org.net-snmp.snmpd',
+      default    => 'org.macports.net-snmp',
+    },
+  }
+  $config_file_absent = $::osfamily ? {
+    default   => undef,
+    'Solaris' => '/etc/opt/csw/snmp/snmpd.conf',
+    'Darwin'  => $darwin_provider ? {
+      'macports' => '/private/etc/snmp/snmpd.conf',
+      default    => '/opt/local/etc/snmp/snmpd.conf',
+    },
   }
 
   $config_directory = $::osfamily ? {
-    'Darwin'  => '/private/etc/snmp',
+    default   => '/etc/snmp',
     'FreeBSD' => '/usr/local/etc/snmp',
     'Solaris' => '/etc/sma/snmp',
-    default   => '/etc/snmp',
+    'Darwin'  => $darwin_provider ? {
+      'macports' => '/opt/local/etc/snmp',
+      default    => '/private/etc/snmp',
+    },
   }
 
   $config_file_owner = 'root'
-
   $config_file_group = $::osfamily ? {
     'Solaris'            => 'sys',
     /^(Darwin|FreeBSD)$/ => 'wheel',
@@ -50,16 +96,14 @@ class snmp::params {
     $::operatingsystemrelease,
     $::hostname,
     $::productname,
-  ], ' ')
+  ],' ')
   $syscontact     = "Root <root@${::fqdn}>"
   $syslocation    = 'Unknown (configure the Puppet SNMP module)'
   $read_community = 'public'
-  $read_restrict  = ''
-  $audit_only     = $::audit_only ? {
-    undef   => false,
-    default => $::audit_only,
-  }
+  $read_restrict  = undef
 
+  ## Solaris MASF
+  $masf_proxy         = true
   $masf_base_packages = [
     'SUNWmasf',
     'SUNWmasfr',
@@ -80,8 +124,11 @@ class snmp::params {
     default                                => undef,
   }
 
+  # If we're not supporting a $::productname that's known, we provide
+  # no packages, and therefore MASF management doesn't happen.
   $masf_packages = $masf_platform_packages ? {
     undef   => undef,
-    default => flatten( [ $masf_base_packages, $masf_platform_packages ] ),
+    default => delete_undef_values(union(
+      $masf_base_packages,$masf_platform_packages)),
   }
 }
