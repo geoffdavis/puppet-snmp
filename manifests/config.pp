@@ -42,10 +42,6 @@ class snmp::config {
       }
     } 'FreeBSD': {
       # Per `man 5 snmp_config`
-      ensure_resource('file',$snmp::config_directory,{
-        ensure => 'directory',
-        before => File['snmpd.conf'],
-      })
       create_resources('file_line',{
         'rc.conf snmpd_flags' => {
           line  => "snmpd_flags=\"${snmp::flags}\"",
