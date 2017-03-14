@@ -1,7 +1,7 @@
 puppet-snmp
 ===========
 
-Version: 0.2.3
+Version: 0.3.0
 
 Puppet module for managing SNMP agents
 
@@ -54,3 +54,9 @@ More advanced:
       syscontact  => "System Administrator <root@${::fqdn}>",
       syslocation => 'Server room Rack 103a',
     }
+
+Contributing
+============
+
+Please use the git-flow method. New features are created on the devel branch,
+while bugfixes and the next release version are created on the master branch.
