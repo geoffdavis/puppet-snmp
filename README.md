@@ -1,7 +1,7 @@
 puppet-snmp
 ===========
 
-Version: 0.3.0
+Version: 0.3.1
 
 Puppet module for managing SNMP agents
 
